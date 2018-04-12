@@ -572,8 +572,9 @@ class LanguagePage(_AScrollablePage):
             u'This function is for translating Bash itself (NOT mods) into '
             u'non-English languages. For more info, '
             u'see the Internationalization section of the Advanced Readme.')
-        if not balt.askContinue(self, message, 'bash.dump_translator.continue',
-                _(u'Dump Localization')): return
+        if not balt.askContinue(self, message,
+                u'bash.dump_translator.continue', _(u'Dump Localization')):
+            return
         outPath = bass.dirs[u'l10n']
         with BusyCursor():
             outFile = dump_translator(outPath.s, bass.active_locale)
