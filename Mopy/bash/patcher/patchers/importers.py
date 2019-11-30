@@ -2272,7 +2272,7 @@ class StatsPatcher(_AStatsPatcher, ImportPatcher):
                 if longid in id_records: continue
                 itemStats = fid_attr_value.get(longid,None)
                 if not itemStats: continue
-                oldValues = dict(zip(attrs,map(record.__getattribute__,attrs)))
+                oldValues = dict(zip(attrs,(getattr(record, attr) for attr in attrs)))
                 if oldValues != itemStats:
                     patchBlock.setRecord(record.getTypeCopy(mapper))
 
@@ -2291,7 +2291,7 @@ class StatsPatcher(_AStatsPatcher, ImportPatcher):
                 fid = record.fid
                 itemStats = fid_attr_value.get(fid,None)
                 if not itemStats: continue
-                oldValues = dict(zip(attrs,map(record.__getattribute__,attrs)))
+                oldValues = dict(zip(attrs,(getattr(record, attr) for attr in attrs)))
                 if oldValues != itemStats:
                     for attr, value in itemStats.iteritems():
                         setattr(record,attr,value)
