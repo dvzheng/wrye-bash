@@ -208,12 +208,12 @@ class _AFixedPage(_ASettingsPage, PanelWin): pass
 class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
     """Color configuration page."""
     _keys_to_tabs = {
-        'mods': _(u'[Mods] '),
-        'screens': _(u'[Saves, Screens] '),
-        'installers': _(u'[Installers] '),
-        'ini': _(u'[INI Edits] '),
-        'tweak': _(u'[INI Edits] '),
-        'default': _(u'[All] '),
+        u'mods': _(u'[Mods] '),
+        u'screens': _(u'[Saves, Screens] '),
+        u'installers': _(u'[Installers] '),
+        u'ini': _(u'[INI Edits] '),
+        u'tweak': _(u'[INI Edits] '),
+        u'default': _(u'[All] '),
     }
 
     def __init__(self, parent, page_desc):
@@ -284,7 +284,7 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
                 color = self.changes[key]
             else:
                 color = colors[key]
-            default = color == Color(*settingDefaults['bash.colors'][key])
+            default = color == Color(*settingDefaults[u'bash.colors'][key])
             if not default:
                 allDefault = False
                 break
@@ -294,7 +294,7 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
             color = self.changes[color_key]
         else:
             color = colors[color_key]
-        default = color == Color(*settingDefaults['bash.colors'][color_key])
+        default = color == Color(*settingDefaults[u'bash.colors'][color_key])
         # Update the Buttons, DropDown, and ColorPicker
         if self._mark_changed:
             # If _mark_changed is None, then we're still in the construction
@@ -308,13 +308,13 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
 
     def OnDefault(self):
         color_key = self.GetColorKey()
-        newColor = Color(*settingDefaults['bash.colors'][color_key])
+        newColor = Color(*settingDefaults[u'bash.colors'][color_key])
         self.changes[color_key] = newColor
         self.UpdateUIButtons()
 
     def OnDefaultAll(self):
         for key in colors:
-            default = Color(*settingDefaults['bash.colors'][key])
+            default = Color(*settingDefaults[u'bash.colors'][key])
             if colors[key] != default:
                 self.changes[key] = default
         self.UpdateUIButtons()
@@ -323,12 +323,12 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
         for key,newColor in self.changes.iteritems():
             bass.settings[u'bash.colors'][key] = newColor.to_rgb_tuple()
             colors[key] = newColor
-        bass.settings.setChanged('bash.colors')
+        bass.settings.setChanged(u'bash.colors')
         self.UpdateUIButtons()
         self.UpdateUIColors()
 
     def OnExport(self):
-        outDir = bass.dirs['patches']
+        outDir = bass.dirs[u'patches']
         outDir.makedirs()
         #--File dialog
         outPath = balt.askSave(self, _(u'Export color configuration to:'),
@@ -452,7 +452,7 @@ class ConfigureEditorDialog(DialogWindow):
         """Opens a file dialog to choose the editor."""
         # Don't use mustExist, we want to show an error message for that below
         chosen_editor = balt.askOpen(self, title=_(u'Choose Editor'),
-            defaultDir=os.environ.get('ProgramFiles', u''), wildcard=u'*.exe',
+            defaultDir=os.environ.get(u'ProgramFiles', u''), wildcard=u'*.exe',
             mustExist=True)
         if chosen_editor:
             self._editor_location.text_content = chosen_editor.s
@@ -488,7 +488,7 @@ class LanguagePage(_AScrollablePage):
         all_langs = [l.body for l in self._gather_l10n()
                      if l.csbody[-3:] != u'new']
         # Insert English since there's no localization file for that
-        if GPath('english') not in all_langs:
+        if GPath(u'english') not in all_langs:
             all_langs.append(GPath(u'english'))
         localized_langs = [self.languageMap.get(l.s.lower(), l.s)
                            for l in all_langs]
@@ -675,7 +675,7 @@ class LanguagePage(_AScrollablePage):
                 lang_str = internal_name.s
                 self._request_restart(
                     _(u'Language: %s') % self.languageMap[lang_str.lower()],
-                    ['--Language', lang_str])
+                    [u'--Language', lang_str])
 
     def _populate_l10n_list(self):
         """Clears and repopulates the localization list."""
@@ -821,7 +821,7 @@ class StatusBarPage(_AScrollablePage):
         matches the list of icons that are currently hidden."""
         self._mark_setting_changed(u'hidden_icons',
              self._get_chosen_hidden_icons() != bass.settings[
-                 'bash.statusbar.hide'])
+                 u'bash.statusbar.hide'])
 
     def _populate_icon_lists(self):
         """Clears and repopulates the two icon lists."""
@@ -841,7 +841,7 @@ class StatusBarPage(_AScrollablePage):
             else:
                 # If the link is an _App_Button, it will have a
                 # 'sb_button_tip' attribute
-                tip_ = getattr(link, 'sb_button_tip', None) # YAK YAK YAK
+                tip_ = getattr(link, u'sb_button_tip', None) # YAK YAK YAK
             if tip_ is None:
                 # No good, use its uid as a last resort
                 tip_ = link.uid
@@ -893,7 +893,7 @@ class BackupsPage(_AFixedPage):
     @property
     def _backup_dir(self):
         """Returns the directory into which backups will be saved."""
-        return bass.settings[u'bash.backupPath'] or bass.dirs['modsBash']
+        return bass.settings[u'bash.backupPath'] or bass.dirs[u'modsBash']
 
     @property
     def _chosen_backup(self):
@@ -995,16 +995,16 @@ class BackupsPage(_AFixedPage):
             if error_msg and not balt.askWarning(self, error_msg, error_title):
                 return
             restarting = True
-            balt.showInfo(self, '\n'.join([
+            balt.showInfo(self, u'\n'.join([
                 _(u'Your Bash settings have been successfully extracted.'),
                 _(u'Backup Path: ') + settings_file.s, u'', _(u'Before the '
                   u'settings can take effect, Wrye Bash must restart.'), _(
                 u'Click OK to restart now.')]), _(u'Bash Settings Extracted'))
             try: # we currently disallow backup and restore on the same boot
-                bass.sys_argv.remove('--backup')
+                bass.sys_argv.remove(u'--backup')
             except ValueError:
                 pass
-            Link.Frame.Restart(['--restore'], ['--filename', backup_dir.s])
+            Link.Frame.Restart([u'--restore'], [u'--filename', backup_dir.s])
         except exception.BoltError as e:
             deprint(u'Restore settings failed:', traceback=True)
             restore_.warn_message(balt, e.message)
@@ -1342,7 +1342,7 @@ class GeneralPage(_AScrollablePage):
             chosen_game = self._managed_game.get_value()
             self._request_restart(
                 _(u'Managed Game: %s') % chosen_game,
-                ['--oblivionPath', bush.game_path(chosen_game).s])
+                [u'--oblivionPath', bush.game_path(chosen_game).s])
         # Plugin Encoding
         if self._is_changed(u'plugin_encoding'):
             chosen_encoding = self._all_encodings[
@@ -1366,7 +1366,7 @@ class GeneralPage(_AScrollablePage):
             Link.Frame.set_bash_frame_title()
         # Administrator Mode
         if self._is_changed(u'uac_restart'):
-            self._request_restart(_(u'Administrator Mode'), ['--uac'])
+            self._request_restart(_(u'Administrator Mode'), [u'--uac'])
         super(GeneralPage, self).on_apply()
 
 # Trusted Binaries ------------------------------------------------------------
@@ -1407,7 +1407,7 @@ class TrustedBinariesPage(_AFixedPage):
 
     ##: Here be dragons, especially in the import method
     def _export_lists(self):
-        textDir = bass.dirs['patches']
+        textDir = bass.dirs[u'patches']
         textDir.makedirs()
         #--File dialog
         title = _(u'Export list of allowed/disallowed plugin DLLs to:')
@@ -1432,7 +1432,7 @@ class TrustedBinariesPage(_AFixedPage):
             else: out.write(u'None\r\n')
 
     def _import_lists(self):
-        textDir = bass.dirs['patches']
+        textDir = bass.dirs[u'patches']
         textDir.makedirs()
         #--File dialog
         defFile = bush.game.Se.se_abbrev + u' ' + _(
@@ -1449,13 +1449,13 @@ class TrustedBinariesPage(_AFixedPage):
                                   _(u'Merge permissions?'))
         try:
             with textPath.open(u'r', encoding=u'utf-8-sig') as ins:
-                Dlls = {'goodDlls':{},'badDlls':{}}
+                Dlls = {u'goodDlls': {}, u'badDlls': {}}
                 for line in ins:
                     line = line.strip()
                     if line.startswith(u'goodDlls'):
-                        current = Dlls['goodDlls']
+                        current = Dlls[u'goodDlls']
                     if line.startswith(u'badDlls'):
-                        current = Dlls['badDlls']
+                        current = Dlls[u'badDlls']
                     elif line.startswith(u'dll:'):
                         dll = line.split(u':',1)[1].strip().rstrip(u':')
                         current.setdefault(dll,[])
@@ -1467,13 +1467,13 @@ class TrustedBinariesPage(_AFixedPage):
             if not replace:
                 self._binaries_list.left_items = list(
                     set(self._binaries_list.left_items) |
-                    set(Dlls['goodDlls']))
+                    set(Dlls[u'goodDlls']))
                 self._binaries_list.right_items = list(
                     set(self._binaries_list.right_items) |
-                    set(Dlls['badDlls']))
+                    set(Dlls[u'badDlls']))
             else:
-                self._binaries_list.left_items = Dlls['goodDlls'].keys()
-                self._binaries_list.right_items = Dlls['badDlls'].keys()
+                self._binaries_list.left_items = Dlls[u'goodDlls'].keys()
+                self._binaries_list.right_items = Dlls[u'badDlls'].keys()
         except UnicodeError:
             balt.showError(self,
                 _(u'Wrye Bash could not load %s, because it is not saved in '
@@ -1511,8 +1511,8 @@ class TrustedBinariesPage(_AFixedPage):
         merge_versions(dll_source=bad_removed, target_dict=good_dlls_dict,
             source_dict=bad_dlls_dict)
         # Force the settings to be saved and BAIN to update its good/bad caches
-        bass.settings.setChanged('bash.installers.badDlls')
-        bass.settings.setChanged('bash.installers.goodDlls')
+        bass.settings.setChanged(u'bash.installers.badDlls')
+        bass.settings.setChanged(u'bash.installers.goodDlls')
         bosh.bain.Installer.badDlls(force_recalc=True)
         bosh.bain.Installer.goodDlls(force_recalc=True)
         self._mark_changed(self, False)
