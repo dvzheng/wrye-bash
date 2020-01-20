@@ -178,9 +178,10 @@ class MobBase(object):
         """Updates set of master names according to masters actually used."""
         raise AbstractError(u'updateMasters not implemented')
 
-    def updateRecords(self,block,mapper,toLong):
+    def updateRecords(self, block, mergeIds):
         """Looks through all of the records in 'block', and updates any
-        records in self that exist with the data in 'block'."""
+        records in self that exist with the data in 'block'. 'block' must be in
+        long fids format."""
         raise AbstractError(u'updateRecords not implemented')
 
 #------------------------------------------------------------------------------
@@ -301,16 +302,16 @@ class MobObjects(MobBase):
         self.id_records.clear()
         self.setChanged()
 
-    def updateRecords(self,srcBlock,mapper,mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         if self.records and not self.id_records:
             self.indexRecords()
         merge_ids_discard = mergeIds.discard
         copy_to_self = self.setRecord
         dest_rec_fids = self.id_records
         for record in srcBlock.getActiveRecords():
-            src_rec_fid = mapper(record.fid)
+            src_rec_fid = record.fid
             if src_rec_fid in dest_rec_fids:
-                copy_to_self(record.getTypeCopy(mapper))
+                copy_to_self(record.getTypeCopy())
                 merge_ids_discard(src_rec_fid)
 
     def merge_records(self, block, loadSet, mergeIds, iiSkipMerge, doFilter):
@@ -485,18 +486,18 @@ class MobDial(MobObjects):
             self.dial.updateMasters(masterset_add)
         super(MobDial, self).updateMasters(masterset_add)
 
-    def updateRecords(self, srcBlock, mapper, mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         src_dial = srcBlock.dial
-        if self.dial.fid != mapper(src_dial.fid):
+        if self.dial.fid != src_dial.fid:
             raise ModFidMismatchError(self.inName, u'DIAL', self.dial.fid,
-                mapper(srcBlock.dial.fid))
+                                      srcBlock.dial.fid)
         # Copy the latest version of the DIAL record over. We can safely mark
         # it as not merged because keepRecords above ensures that we never
         # discard a DIAL when it still has INFO children
         if not src_dial.flags1.ignored:
-            self.dial = src_dial.getTypeCopy(mapper)
+            self.dial = src_dial.getTypeCopy()
             mergeIds.discard(self.dial.fid)
-        super(MobDial, self).updateRecords(srcBlock, mapper, mergeIds)
+        super(MobDial, self).updateRecords(srcBlock, mergeIds)
 
     def _sort_by_pnam(self):
         """Returns a list of the INFOs of this DIAL record, sorted by their
@@ -728,15 +729,15 @@ class MobDials(MobBase):
         for dialogue in self.dialogues:
             dialogue.updateMasters(masterset_add)
 
-    def updateRecords(self, srcBlock, mapper, mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         if self.dialogues and not self.id_dialogues:
             self.indexRecords()
         lookup_dial = self.id_dialogues.get
         for src_dial in srcBlock.dialogues:
             # Check if we have a corresponding DIAL record in the destination
-            dest_dial = lookup_dial(mapper(src_dial.dial.fid))
+            dest_dial = lookup_dial(src_dial.dial.fid)
             if dest_dial:
-                dest_dial.updateRecords(src_dial, mapper, mergeIds)
+                dest_dial.updateRecords(src_dial, mergeIds)
 
     def __repr__(self):
         return u'<DIAL GRUP: %u record(s)>' % len(self.dialogues)
@@ -768,6 +769,7 @@ class MobCell(MobBase):
         distantAppend = distant.append
         insSeek = ins.seek
         subgroupLoaded = [False, False, False]
+        groupType = None # guaranteed to compare False to any of them
         while not insAtEnd(endPos,'Cell Block'):
             header = insRecHeader()
             recType = header.recType
@@ -931,28 +933,26 @@ class MobCell(MobBase):
         if self.pgrd:
             self.pgrd.updateMasters(masterset_add)
 
-    def updateRecords(self, srcBlock, mapper, mergeIds, __attrget=attrgetter(
+    def updateRecords(self, srcBlock, mergeIds, __attrget=attrgetter(
         u'cell', u'pgrd', u'land', u'persistent', u'temp', u'distant')):
         """Updates any records in 'self' that exist in 'srcBlock'."""
         mergeDiscard = mergeIds.discard
-        selfSetter = self.__setattr__
         self_src_attrs = zip(__attrget(self), __attrget(srcBlock))
         for attr, (myRecord, record) in zip((u'cell', u'pgrd', u'land'),
                                           self_src_attrs):
             if myRecord and record:
-                if myRecord.fid != mapper(record.fid):
+                if myRecord.fid != record.fid:
                     raise ModFidMismatchError(self.inName, myRecord.recType,
-                        myRecord.fid, mapper(record.fid))
+                        myRecord.fid, record.fid)
                 if not record.flags1.ignored:
-                    record = record.getTypeCopy(mapper)
-                    setattr(self, attr, record)
+                    setattr(self, attr, record.getTypeCopy())
                     mergeDiscard(record.fid)
         for attr, (self_rec_list, src_rec_list) in zip(
                 (u'persistent', u'temp', u'distant'), self_src_attrs[3:]):
-            fids = {record.fid: i for i, record in enumerate(self_rec_list)}
+            fids_dx = {record.fid: i for i, record in enumerate(self_rec_list)}
             for record in src_rec_list:
-                if not record.flags1.ignored and mapper(record.fid) in fids:
-                    self_rec_list[fids[record.fid]] = record.getTypeCopy(mapper)
+                if not record.flags1.ignored and record.fid in fids_dx:
+                    self_rec_list[fids_dx[record.fid]] = record.getTypeCopy()
                     mergeDiscard(record.fid)
 
     def iter_records(self):
@@ -1060,7 +1060,7 @@ class MobCells(MobBase):
 
     def indexRecords(self):
         """Indexes records by fid."""
-        self.id_cellBlock = dict((x.cell.fid,x) for x in self.cellBlocks)
+        self.id_cellBlock = {x.cell.fid: x for x in self.cellBlocks}
 
     def setCell(self,cell):
         """Adds record to record list and indexed."""
@@ -1086,11 +1086,11 @@ class MobCells(MobBase):
 
     def getUsedBlocks(self):
         """Returns a set of blocks that exist in this group."""
-        return set(x.getBsb()[0] for x in self.cellBlocks)
+        return {x.getBsb()[0] for x in self.cellBlocks}
 
     def getUsedSubblocks(self):
         """Returns a set of block/sub-blocks that exist in this group."""
-        return set(x.getBsb() for x in self.cellBlocks)
+        return {x.getBsb() for x in self.cellBlocks}
 
     def getBsbSizes(self):
         """Returns the total size of the block, but also returns a
@@ -1212,15 +1212,15 @@ class MobCells(MobBase):
         for cellBlock in self.cellBlocks:
             cellBlock.convertFids(mapper,toLong)
 
-    def updateRecords(self,srcBlock,mapper,mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         """Updates any records in 'self' that exist in 'srcBlock'."""
         if self.cellBlocks and not self.id_cellBlock:
             self.indexRecords()
         id_Get = self.id_cellBlock.get
         for srcCellBlock in srcBlock.cellBlocks:
-            cellBlock = id_Get(mapper(srcCellBlock.cell.fid))
+            cellBlock = id_Get(srcCellBlock.cell.fid)
             if cellBlock:
-                cellBlock.updateRecords(srcCellBlock,mapper,mergeIds)
+                cellBlock.updateRecords(srcCellBlock, mergeIds)
 
     def updateMasters(self, masterset_add):
         """Updates set of master names according to masters actually used."""
@@ -1505,23 +1505,21 @@ class MobWorld(MobCells):
             self.worldCellBlock.updateMasters(masterset_add)
         super(MobWorld, self).updateMasters(masterset_add)
 
-    def updateRecords(self,srcBlock,mapper,mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         """Updates any records in 'self' that exist in 'srcBlock'."""
         for attr in ('world','road'):
             myRecord = getattr(self, attr)
             record = getattr(srcBlock, attr)
             if myRecord and record:
-                if myRecord.fid != mapper(record.fid):
+                if myRecord.fid != record.fid:
                     raise ModFidMismatchError(self.inName, myRecord.recType,
-                        myRecord.fid, mapper(record.fid))
+                        myRecord.fid, record.fid)
                 if not record.flags1.ignored:
-                    record = record.getTypeCopy(mapper)
-                    setattr(self, attr, record)
+                    setattr(self, attr, record.getTypeCopy())
                     mergeIds.discard(record.fid)
         if self.worldCellBlock and srcBlock.worldCellBlock:
-            self.worldCellBlock.updateRecords(srcBlock.worldCellBlock,mapper,
-                                              mergeIds)
-        MobCells.updateRecords(self,srcBlock,mapper,mergeIds)
+            self.worldCellBlock.updateRecords(srcBlock.worldCellBlock,mergeIds)
+        MobCells.updateRecords(self, srcBlock, mergeIds)
 
     def iter_records(self):
         single_recs = [x for x in (self.world, self.road) if x]
@@ -1715,23 +1713,23 @@ class MobWorlds(MobBase):
 
     def indexRecords(self):
         """Indexes records by fid."""
-        self.id_worldBlocks = dict((x.world.fid,x) for x in self.worldBlocks)
+        self.id_worldBlocks = {x.world.fid: x for x in self.worldBlocks}
 
     def updateMasters(self, masterset_add):
         """Updates set of master names according to masters actually used."""
         for worldBlock in self.worldBlocks:
             worldBlock.updateMasters(masterset_add)
 
-    def updateRecords(self,srcBlock,mapper,mergeIds):
+    def updateRecords(self, srcBlock, mergeIds):
         """Updates any records in 'self' that exist in 'srcBlock'."""
         if self.worldBlocks and not self.id_worldBlocks:
             self.indexRecords()
         id_worldBlocks = self.id_worldBlocks
         idGet = id_worldBlocks.get
         for srcWorldBlock in srcBlock.worldBlocks:
-            worldBlock = idGet(mapper(srcWorldBlock.world.fid))
+            worldBlock = idGet(srcWorldBlock.world.fid)
             if worldBlock:
-                worldBlock.updateRecords(srcWorldBlock,mapper,mergeIds)
+                worldBlock.updateRecords(srcWorldBlock, mergeIds)
 
     def setWorld(self, world, worldcellblock=None):
         """Adds record to record list and indexed."""
