@@ -321,7 +321,7 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
 
     def on_apply(self):
         for key,newColor in self.changes.iteritems():
-            bass.settings['bash.colors'][key] = newColor.to_rgb_tuple()
+            bass.settings[u'bash.colors'][key] = newColor.to_rgb_tuple()
             colors[key] = newColor
         bass.settings.setChanged('bash.colors')
         self.UpdateUIButtons()
@@ -716,10 +716,10 @@ class StatusBarPage(_AScrollablePage):
         self._show_app_ver_chk = CheckBox(self, _(u'Show App Version'),
             chkbx_tooltip=_(u'Show/hide version numbers for buttons on the '
                             u'status bar.'),
-            checked=bass.settings['bash.statusbar.showversion'])
+            checked=bass.settings[u'bash.statusbar.showversion'])
         self._show_app_ver_chk.on_checked.subscribe(self._handle_app_ver)
         self._icon_size_dropdown = DropDown(self,
-            value=unicode(bass.settings['bash.statusbar.iconSize']),
+            value=unicode(bass.settings[u'bash.statusbar.iconSize']),
             choices=(u'16', u'24', u'32'), auto_tooltip=False)
         self._icon_size_dropdown.tooltip = _(u'Sets the status bar icons to '
                                              u'the selected size in pixels.')
@@ -762,12 +762,12 @@ class StatusBarPage(_AScrollablePage):
     def _handle_app_ver(self, checked):
         """Internal callback, called when the version checkbox is changed."""
         self._mark_setting_changed(u'app_ver',
-            checked != bass.settings['bash.statusbar.showversion'])
+            checked != bass.settings[u'bash.statusbar.showversion'])
 
     def _handle_icon_size(self, new_selection):
         """Internal callback, called when the icon size dropdown is changed."""
         self._mark_setting_changed(u'icon_size',
-            int(new_selection) != bass.settings['bash.statusbar.iconSize'])
+            int(new_selection) != bass.settings[u'bash.statusbar.iconSize'])
 
     def _link_by_uid(self, link_uid):
         """Returns the status bar Link with the specified UID."""
@@ -781,7 +781,7 @@ class StatusBarPage(_AScrollablePage):
         # at once at the end
         # Show App Version
         if self._is_changed(u'app_ver'):
-            bass.settings['bash.statusbar.showversion'] ^= True
+            bass.settings[u'bash.statusbar.showversion'] ^= True
             for button in BashStatusBar.buttons:
                 button.set_sb_button_tooltip()
             if BashStatusBar.obseButton.button_state:
@@ -791,7 +791,7 @@ class StatusBarPage(_AScrollablePage):
         # Icon Size
         icon_size_changed = self._is_changed(u'icon_size')
         if icon_size_changed:
-            bass.settings['bash.statusbar.iconSize'] = \
+            bass.settings[u'bash.statusbar.iconSize'] = \
                 int(self._icon_size_dropdown.get_value())
             Link.Frame.statusBar.UpdateIconSizes(skip_refresh=True)
         # Hidden Icons
@@ -799,7 +799,7 @@ class StatusBarPage(_AScrollablePage):
         if hidden_icons_changed:
             # Compare old and new hidden, then hide the newly hidden buttons
             # and unhide the newly visible ones
-            old_hidden = bass.settings['bash.statusbar.hide']
+            old_hidden = bass.settings[u'bash.statusbar.hide']
             new_hidden = self._get_chosen_hidden_icons()
             hidden_added = new_hidden - old_hidden
             hidden_removed = old_hidden - new_hidden
@@ -826,7 +826,7 @@ class StatusBarPage(_AScrollablePage):
         """Clears and repopulates the two icon lists."""
         # Here be dragons, of the tooltip-related kind
         self._tip_to_links.clear()
-        hide = bass.settings['bash.statusbar.hide']
+        hide = bass.settings[u'bash.statusbar.hide']
         hidden = []
         visible = []
         for link in BashStatusBar.buttons:
@@ -892,7 +892,7 @@ class BackupsPage(_AFixedPage):
     @property
     def _backup_dir(self):
         """Returns the directory into which backups will be saved."""
-        return bass.settings['bash.backupPath'] or bass.dirs['modsBash']
+        return bass.settings[u'bash.backupPath'] or bass.dirs['modsBash']
 
     @property
     def _chosen_backup(self):
@@ -1416,17 +1416,17 @@ class TrustedBinariesPage(_AFixedPage):
         if not textPath: return
         with textPath.open('w',encoding='utf-8-sig') as out:
             out.write(u'goodDlls '+_(u'(those dlls that you have chosen to allow to be installed)')+u'\r\n')
-            if bass.settings['bash.installers.goodDlls']:
-                for dll in bass.settings['bash.installers.goodDlls']:
+            if bass.settings[u'bash.installers.goodDlls']:
+                for dll in bass.settings[u'bash.installers.goodDlls']:
                     out.write(u'dll:'+dll+u':\r\n')
-                    for index, version in enumerate(bass.settings['bash.installers.goodDlls'][dll]):
+                    for index, version in enumerate(bass.settings[u'bash.installers.goodDlls'][dll]):
                         out.write(u'version %02d: %s\r\n' % (index, version))
             else: out.write(u'None\r\n')
             out.write(u'badDlls '+_(u'(those dlls that you have chosen to NOT allow to be installed)')+u'\r\n')
-            if bass.settings['bash.installers.badDlls']:
-                for dll in bass.settings['bash.installers.badDlls']:
+            if bass.settings[u'bash.installers.badDlls']:
+                for dll in bass.settings[u'bash.installers.badDlls']:
                     out.write(u'dll:'+dll+u':\r\n')
-                    for index, version in enumerate(bass.settings['bash.installers.badDlls'][dll]):
+                    for index, version in enumerate(bass.settings[u'bash.installers.badDlls'][dll]):
                         out.write(u'version %02d: %s\r\n' % (index, version))
             else: out.write(u'None\r\n')
 
@@ -1498,8 +1498,8 @@ class TrustedBinariesPage(_AFixedPage):
                 target_dict[d] = prev_vers + new_vers
                 # Finally, remove the entry from the dict it was previously in
                 del source_dict[d]
-        bad_dlls_dict = bass.settings['bash.installers.badDlls']
-        good_dlls_dict = bass.settings['bash.installers.goodDlls']
+        bad_dlls_dict = bass.settings[u'bash.installers.badDlls']
+        good_dlls_dict = bass.settings[u'bash.installers.goodDlls']
         # Determine which have been moved to/from the bad DLLs list
         old_bad = set(bad_dlls_dict)
         new_bad = set(self._binaries_list.right_items)

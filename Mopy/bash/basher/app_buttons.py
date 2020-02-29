@@ -80,7 +80,7 @@ class StatusBar_Button(ItemLink):
     def GetBitmapButton(self, window, image=None, onRClick=None):
         """Create and return gui button - you must define imageKey - WIP overrides"""
         btn_image = image or balt.images[self.imageKey %
-                        bass.settings['bash.statusbar.iconSize']].GetBitmap()
+                        bass.settings[u'bash.statusbar.iconSize']].GetBitmap()
         if self.gButton is not None:
             self.gButton.destroy_component()
         self.gButton = ClickableImage(window, btn_image,
@@ -103,7 +103,7 @@ class StatusBar_Button(ItemLink):
     # Helper function to get OBSE version
     @property
     def obseVersion(self):
-        if not bass.settings['bash.statusbar.showversion']: return u''
+        if not bass.settings[u'bash.statusbar.showversion']: return u''
         for ver_file in bush.game.Se.ver_files:
             ver_path = bass.dirs[u'app'].join(ver_file)
             if ver_path.exists():
@@ -123,7 +123,7 @@ class _App_Button(StatusBar_Button):
 
     @property
     def version(self):
-        if not bass.settings['bash.statusbar.showversion']: return u''
+        if not bass.settings[u'bash.statusbar.showversion']: return u''
         if self.IsPresent():
             version = self.exePath.strippedVersion
             if version != (0,):
@@ -136,7 +136,7 @@ class _App_Button(StatusBar_Button):
 
     @property
     def sb_button_tip(self):
-        if not bass.settings['bash.statusbar.showversion']: return self._tip
+        if not bass.settings[u'bash.statusbar.showversion']: return self._tip
         else:
             return self._tip + u' ' + self.version
 
@@ -164,7 +164,7 @@ class _App_Button(StatusBar_Button):
 
     def GetBitmapButton(self, window, image=None, onRClick=None):
         if not self.IsPresent(): return None
-        size = bass.settings['bash.statusbar.iconSize'] # 16, 24, 32
+        size = bass.settings[u'bash.statusbar.iconSize'] # 16, 24, 32
         idex = (size // 8) - 2 # 0, 1, 2, duh
         super(_App_Button, self).GetBitmapButton(
             window, self.images[idex].GetBitmap(), onRClick)
@@ -431,11 +431,11 @@ class App_BOSS(_ExeButton):
         self.mainMenu.append(_Mods_BOSSDisableLockTimes())
 
     def Execute(self):
-        if bass.settings['BOSS.UseGUI']:
+        if bass.settings[u'BOSS.UseGUI']:
             self.exePath = self.boss_path.head.join(u'boss_gui.exe')
         else:
             self.exePath = self.boss_path
-        self.wait = bool(bass.settings['BOSS.ClearLockTimes'])
+        self.wait = bool(bass.settings[u'BOSS.ClearLockTimes'])
         extraArgs = []
         if balt.getKeyState(82) and balt.getKeyState_Shift():
             extraArgs.append(u'-r 2',) # Revert level 2 - BOSS version 1.6+
@@ -450,7 +450,7 @@ class App_BOSS(_ExeButton):
             extraArgs.append(u'-g%s' % bush.game.fsName,)
         self.extraArgs = tuple(extraArgs)
         super(App_BOSS, self).Execute()
-        if bass.settings['BOSS.ClearLockTimes']:
+        if bass.settings[u'BOSS.ClearLockTimes']:
             # Clear the saved times from before
             with load_order.Unlock():
                 # Refresh to get the new load order that BOSS specified. If
@@ -508,7 +508,7 @@ class Game_Button(_ExeButton):
 
     @property
     def version(self):
-        if not bass.settings['bash.statusbar.showversion']: return u''
+        if not bass.settings[u'bash.statusbar.showversion']: return u''
         version = self._version_path.strippedVersion
         if version != (0,):
             version = u'.'.join([u'%s'%x for x in version])
@@ -574,7 +574,7 @@ class _StatefulButton(StatusBar_Button):
             self.button_state = True ^ self.button_state
         if self.gButton:
             self.gButton.image = balt.images[self.imageKey %
-                        bass.settings['bash.statusbar.iconSize']].GetBitmap()
+                        bass.settings[u'bash.statusbar.iconSize']].GetBitmap()
             self.gButton.tooltip = self.sb_button_tip
 
     @property
@@ -690,7 +690,7 @@ class App_DocBrowser(StatusBar_Button):
     def Execute(self):
         if not Link.Frame.docBrowser:
             DocBrowser().show_frame()
-            bass.settings['bash.modDocs.show'] = True
+            bass.settings[u'bash.modDocs.show'] = True
         Link.Frame.docBrowser.raise_frame()
 
 #------------------------------------------------------------------------------
@@ -711,7 +711,7 @@ class App_Restart(StatusBar_Button):
     _tip = _(u"Restart")
 
     def GetBitmapButton(self, window, image=None, onRClick=None):
-        size = bass.settings['bash.statusbar.iconSize']
+        size = bass.settings[u'bash.statusbar.iconSize']
         return super(App_Restart, self).GetBitmapButton(
             window, staticBitmap(window, special='undo', size=(size,size)),
             onRClick)

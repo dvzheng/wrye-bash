@@ -113,7 +113,7 @@ class ImportFaceDialog(DialogWindow):
         pc_flags.stats = self.statsCheck.is_checked
         pc_flags.iclass = self.classCheck.is_checked
         #deprint(flags.getTrueAttrs())
-        bass.settings['bash.faceImport.flags'] = int(pc_flags)
+        bass.settings[u'bash.faceImport.flags'] = int(pc_flags)
         bosh.faces.PCFaces.save_setFace(self.fileInfo,self.data[item],pc_flags)
         balt.showOk(self, _(u'Face imported.'), self.fileInfo.name.s)
         self.accept_modal()
