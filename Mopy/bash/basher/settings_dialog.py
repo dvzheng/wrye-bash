@@ -335,7 +335,7 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
                                outDir, _(u'Colors.txt'), u'*.txt')
         if not outPath: return
         try:
-            with outPath.open('w') as out:
+            with outPath.open(u'w') as out:
                 for key in sorted(colors):
                     if key in self.changes:
                         color = self.changes[key]
@@ -355,7 +355,7 @@ class ColorsPage(_AFixedPage): ##: _AScrollablePage breaks the color picker??
                               mustExist=True)
         if not inPath: return
         try:
-            with inPath.open('r') as ins:
+            with inPath.open(u'r') as ins:
                 for line in ins:
                     # Format validation
                     if u':' not in line:
@@ -1415,7 +1415,7 @@ class TrustedBinariesPage(_AFixedPage):
         textPath = balt.askSave(self, title=title, defaultDir=textDir,
             defaultFile=file_, wildcard=u'*.txt')
         if not textPath: return
-        with textPath.open('w',encoding='utf-8-sig') as out:
+        with textPath.open(u'w', encoding='utf-8-sig') as out:
             out.write(u'goodDlls '+_(u'(those dlls that you have chosen to allow to be installed)')+u'\r\n')
             if bass.settings[u'bash.installers.goodDlls']:
                 for dll in bass.settings[u'bash.installers.goodDlls']:
@@ -1448,7 +1448,7 @@ class TrustedBinariesPage(_AFixedPage):
         replace = not balt.askYes(Link.Frame, message,
                                   _(u'Merge permissions?'))
         try:
-            with textPath.open('r',encoding='utf-8-sig') as ins:
+            with textPath.open(u'r',encoding='utf-8-sig') as ins:
                 Dlls = {'goodDlls':{},'badDlls':{}}
                 for line in ins:
                     line = line.strip()

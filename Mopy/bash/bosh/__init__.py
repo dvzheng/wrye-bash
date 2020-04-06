@@ -583,7 +583,7 @@ class ModInfo(FileInfo):
 
     def readHeader(self):
         """Read header from file and set self.header attribute."""
-        with ModReader(self.name,self.getPath().open('rb')) as ins:
+        with ModReader(self.name,self.getPath().open(u'rb')) as ins:
             try:
                 tes4_rec_header = self._read_tes4_record(ins)
                 self.header = bush.game.plugin_header_class(tes4_rec_header,
@@ -599,8 +599,8 @@ class ModInfo(FileInfo):
     def writeHeader(self):
         """Write Header. Actually have to rewrite entire file."""
         filePath = self.getPath()
-        with filePath.open('rb') as ins:
-            with filePath.temp.open('wb') as out:
+        with filePath.open(u'rb') as ins:
+            with filePath.temp.open(u'wb') as out:
                 try:
                     #--Open original and skip over header
                     reader = ModReader(self.name,ins)
@@ -1087,8 +1087,8 @@ class SaveInfo(FileInfo):
         """Rewrites masters of existing save file."""
         if not self.abs_path.exists():
             raise SaveFileError(self.abs_path.head, u'File does not exist.')
-        with self.abs_path.open('rb') as ins:
-            with self.abs_path.temp.open('wb') as out:
+        with self.abs_path.open(u'rb') as ins:
+            with self.abs_path.temp.open(u'wb') as out:
                 oldMasters = self.header.writeMasters(ins, out)
         oldMasters = [GPath_no_norm(decode(x)) for x in oldMasters]
         self.abs_path.untemp()
@@ -3099,7 +3099,7 @@ class PeopleData(DataStore):
     def loadText(self,path):
         """Enter info from text file."""
         newNames, name, buff = set(), None, None
-        with path.open('r') as ins:
+        with path.open(u'r') as ins:
             reName = re.compile(u'==([^=]+)=*$', re.U)
             for line in ins:
                 maName = reName.match(line)
@@ -3118,7 +3118,7 @@ class PeopleData(DataStore):
 
     def dumpText(self,path,names):
         """Dump to text file."""
-        with path.open('w',encoding='utf-8-sig') as out:
+        with path.open(u'w',encoding='utf-8-sig') as out:
             for name in sorted(names,key=unicode.lower):
                 out.write(u'== %s %s\n' % (name,u'='*(75-len(name))))
                 out.write(self[name][2].strip())

@@ -734,7 +734,7 @@ class App_GenPickle(StatusBar_Button):
         import cPickle as pickle  # PY3
         try:
             fids = pickle.load(bass.dirs[u'db'].join(
-                bush.game.pklfile).open('r'))['GMST']
+                bush.game.pklfile).open(u'r'))['GMST']
             if fids:
                 maxId = max(fids.values())
             else:
@@ -770,7 +770,7 @@ class App_GenPickle(StatusBar_Button):
         if maxId > maxOld:
             outData = {'GMST': fids}
             pickle.dump(outData, bass.dirs[u'db'].join(
-                bush.game.pklfile).open('w'))
+                bush.game.pklfile).open(u'w'))
             print(_(u"%d new gmst ids written to " + bush.game.pklfile) % (
                 (maxId - maxOld),))
         else:
