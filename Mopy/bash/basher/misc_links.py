@@ -33,11 +33,11 @@ from .import People_Link, SaveDetails
 from .settings_dialog import SettingsDialog
 from ..bolt import GPath
 
-__all__ = ['ColumnsMenu', 'Master_ChangeTo', 'Master_Disable',
-           'Screens_NextScreenShot', 'Screens_JpgQuality',
-           'Screens_JpgQualityCustom', 'Screen_Rename', 'Screen_ConvertTo',
-           'People_AddNew', 'People_Import', 'People_Karma', 'People_Export',
-           'Master_AllowEdit', 'Master_ClearRenames', 'SortByMenu',
+__all__ = [u'ColumnsMenu', u'Master_ChangeTo', u'Master_Disable',
+           u'Screens_NextScreenShot', u'Screens_JpgQuality',
+           u'Screens_JpgQualityCustom', u'Screen_Rename', u'Screen_ConvertTo',
+           u'People_AddNew', u'People_Import', u'People_Karma', u'People_Export',
+           u'Master_AllowEdit', u'Master_ClearRenames', u'SortByMenu',
            u'Misc_SettingsDialog']
 
 # Screen Links ----------------------------------------------------------------
