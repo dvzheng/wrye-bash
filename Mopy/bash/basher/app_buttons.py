@@ -606,7 +606,7 @@ class _StatefulButton(StatusBar_Button):
 
 class Obse_Button(_StatefulButton):
     """Obse on/off state button."""
-    _state_key = 'bash.obse.on'
+    _state_key = u'bash.obse.on'
     _state_img_key = u'checkbox.green.%s.%s'
     @property
     def _present(self):
@@ -633,7 +633,7 @@ class Obse_Button(_StatefulButton):
 
 class LAA_Button(_StatefulButton):
     """4GB Launcher on/off state button."""
-    _state_key = 'bash.laa.on'
+    _state_key = u'bash.laa.on'
     _state_img_key = u'checkbox.blue.%s.%s'
     @property
     def _present(self):
@@ -657,7 +657,7 @@ class LAA_Button(_StatefulButton):
 #------------------------------------------------------------------------------
 class AutoQuit_Button(_StatefulButton):
     """Button toggling application closure when launching Oblivion."""
-    _state_key = 'bash.autoQuit.on'
+    _state_key = u'bash.autoQuit.on'
     _state_img_key = u'checkbox.red.%s.%s'
     _default_state = False
 
