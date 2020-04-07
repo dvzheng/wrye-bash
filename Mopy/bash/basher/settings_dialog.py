@@ -1071,7 +1071,7 @@ class ConfirmationsPage(_AFixedPage):
         _(u'[Mods] Importing groups from a text file'):
             u'bash.groups.import.continue',
         _(u'[Mods] Locking or unlocking the load order'):
-            u'bash.load_order.lock_continue',
+            u'bash.load_order.lock.continue',
         _(u'[Mods] Removing world orphans'):
             u'bash.removeWorldOrphans.continue',
         _(u"[Mods] Renaming a plugin to something that %s can't "

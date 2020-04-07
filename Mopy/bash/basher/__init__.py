@@ -704,11 +704,11 @@ class INIList(balt.UIList):
     def _warn_tweak_game_ini(chosen):
         ask = True
         if chosen in bush.game.iniFiles:
-            message = (_(u"Apply an ini tweak to %s?") % chosen + u'\n\n' + _(
-                u"WARNING: Incorrect tweaks can result in CTDs and even "
-                u"damage to your computer!"))
+            message = (_(u'Apply an ini tweak to %s?') % chosen + u'\n\n' + _(
+                u'WARNING: Incorrect tweaks can result in CTDs and even '
+                u'damage to your computer!'))
             ask = balt.askContinue(balt.Link.Frame, message,
-                                   'bash.iniTweaks.continue', _(u"INI Tweaks"))
+                                   u'bash.iniTweaks.continue', _(u'INI Tweaks'))
         return ask
 
 #------------------------------------------------------------------------------
@@ -1980,7 +1980,7 @@ class SaveList(balt.UIList):
                 u"by changing its extension to %(ess)s (enabled) or .esr "
                 u"(disabled). Autosaves and quicksaves will be left alone."
                 % {'ess': bush.game.Ess.ext})
-        if not balt.askContinue(self, msg, 'bash.saves.askDisable.continue'):
+        if not balt.askContinue(self, msg, u'bash.saves.askDisable.continue'):
             return
         newEnabled = not bosh.SaveInfos.is_save_enabled(hitItem)
         newName = self.data_store.enable(hitItem, newEnabled)
@@ -2499,7 +2499,7 @@ class InstallersList(balt.UIList):
         if not self.sort_column in self._dndColumns:
             msg = _(u"Drag and drop in the Installer's list is only allowed "
                     u"when the list is sorted by install order")
-            balt.askContinue(self, msg, 'bash.installers.dnd.column.continue')
+            balt.askContinue(self, msg, u'bash.installers.dnd.column.continue')
             return super(InstallersList, self).dndAllow(event) # disallow
         return True
 
