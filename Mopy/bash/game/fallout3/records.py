@@ -80,7 +80,7 @@ if brec.MelModel is None:
             MelGroup.__init__(self, attr, *model_elements)
 
     brec.MelModel = _MelModel
-from ...brec import MelModel, MelLists
+from ...brec import MelModel, MelLists, BipedFlags
 
 #------------------------------------------------------------------------------
 # Record Elements    ----------------------------------------------------------
@@ -100,19 +100,6 @@ class MreActor(MreActorBase):
         'useScript',
     ))
     __slots__ = []
-
-#------------------------------------------------------------------------------
-class MelBipedFlags(Flags):
-    """Biped flags element. Includes biped flag set by default."""
-    mask = 0xFFFF
-    def __init__(self,default=0,newNames=None):
-        names = Flags.getNames(
-            'head', 'hair', 'upperBody', 'leftHand', 'rightHand', 'weapon',
-            'pipboy', 'backpack', 'necklace', 'headband', 'hat', 'eyeGlasses',
-            'noseRing', 'earrings', 'mask', 'choker', 'mouthObject',
-            'bodyAddOn1', 'bodyAddOn2', 'bodyAddOn3')
-        if newNames: names.update(newNames)
-        Flags.__init__(self,default,names)
 
 #------------------------------------------------------------------------------
 class MelConditions(MelGroups):
@@ -488,7 +475,7 @@ class MreArma(MelRecord):
     """Armor Addon."""
     rec_sig = b'ARMA'
 
-    _flags = MelBipedFlags(0)
+    _flags = BipedFlags()
     _dnamFlags = Flags(0, Flags.getNames(
         (0,'modulatesVoice'),
     ))
@@ -520,8 +507,7 @@ class MreArmo(MelRecord):
     """Armor."""
     rec_sig = b'ARMO'
 
-    _flags = MelBipedFlags(0, Flags.getNames())
-
+    _flags = BipedFlags()
     _dnamFlags = Flags(0, Flags.getNames(
         (0,'modulatesVoice'),
     ))
