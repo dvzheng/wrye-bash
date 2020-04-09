@@ -3108,7 +3108,7 @@ class MreLscr(MelRecord):
     melSet = MelSet(
         MelEdid(),
         MelIcons(),
-        MelLString('DESC','description'),
+        MelLString(b'DESC', u'description'),
         MelConditions(),
         MelFid('NNAM','loadingScreenNIF'),
         MelFloat('SNAM', 'initialScale'),
@@ -4777,7 +4777,7 @@ class MreSndr(MelRecord):
         MelStruct('LNAM','sBsB',('unkSndr1',null1),'looping',
                   ('unkSndr2',null1),'rumbleSendValue',),
         MelStruct('BNAM','2b2BH','pctFrequencyShift','pctFrequencyVariance','priority',
-                  'dbVariance','staticAttenuation',),
+                  'dbVariance','staticAtten',),
     )
     __slots__ = melSet.getSlotsUsed()
 
