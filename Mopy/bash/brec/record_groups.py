@@ -32,7 +32,7 @@ from operator import itemgetter, attrgetter
 # Wrye Bash imports
 from .mod_io import GrupHeader, ModReader, RecordHeader, TopGrupHeader
 from .utils_constants import group_types
-from ..bolt import GPath, sio
+from ..bolt import GPath, sio, struct_pack
 from ..exception import AbstractError, ModError, ModFidMismatchError
 
 class MobBase(object):
@@ -1707,7 +1707,7 @@ class MobWorlds(MobBase):
             totalSize = RecordHeader.rec_header_size + sum(
                 x.dump(out) for x in self.worldBlocks)
             out.seek(worldHeaderPos + 4)
-            out.pack(u'I', totalSize)
+            out.write(struct_pack(u'I', totalSize))
             out.seek(worldHeaderPos + totalSize)
 
     def getNumRecords(self,includeGroups=True):

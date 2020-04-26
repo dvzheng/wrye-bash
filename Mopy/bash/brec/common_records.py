@@ -32,12 +32,13 @@ from operator import attrgetter
 from .advanced_elements import AttrExistsDecider, AttrValDecider, MelArray, \
     MelUnion
 from .basic_elements import MelBase, MelFid, MelFids, MelFloat, MelGroups, \
-    MelLString, MelNull, MelStruct, MelUInt32, MelSInt32
+    MelLString, MelNull, MelStruct, MelUInt32, MelSInt32, MelUnicode
 from .common_subrecords import MelEdid
 from .record_structs import MelRecord, MelSet
 from .utils_constants import FID
 from .. import bass, bolt, exception
-from ..bolt import decoder, encode, GPath
+from ..bolt import decoder, GPath
+from ..bolt import struct_pack
 from ..exception import StateError
 
 #------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ class MreHeaderBase(MelRecord):
         This is done to make updating the master list much easier."""
         def __init__(self):
             self._debug = False
-            self.subType = b'MAST' # just in case something is expecting this
+            self.mel_sig = b'MAST' # just in case something is expecting this
 
         def getLoaders(self, loaders):
             loaders[b'MAST'] = loaders[b'DATA'] = self
@@ -75,8 +76,6 @@ class MreHeaderBase(MelRecord):
                     ins.unpack(__unpacker, size_, readId)[0])
 
         def dumpData(self,record,out):
-            pack1 = out.packSub0
-            pack2 = out.packSub
             # Truncate or pad the sizes with zeroes as needed
             # TODO(inf) For Morrowind, this will have to query the files for
             #  their size and then store that
@@ -86,8 +85,10 @@ class MreHeaderBase(MelRecord):
                     num_masters - num_sizes)
             for master_name, master_size in zip(record.masters,
                                                 record.master_sizes):
-                pack1(b'MAST', encode(master_name.s, firstEncoding=u'cp1252'))
-                pack2(b'DATA', u'Q', master_size)
+                MelUnicode(b'MAST', '', encoding=u'cp1252').packSub(
+                    out, master_name.s)
+                MelBase(b'DATA', '').packSub(
+                    out, struct_pack(u'Q', master_size))
 
     def loadData(self, ins, endPos):
         super(MreHeaderBase, self).loadData(ins, endPos)

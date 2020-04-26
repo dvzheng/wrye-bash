@@ -29,9 +29,8 @@ import struct
 from collections import defaultdict
 
 from . import bolt, bush, env, load_order
-from .bass import dirs
 from .bolt import deprint, GPath, SubProgress
-from .brec import MreRecord, ModReader, ModWriter, RecordHeader, RecHeader, \
+from .brec import MreRecord, ModReader, RecordHeader, RecHeader, \
     TopGrupHeader, MobBase, MobDials, MobICells, MobObjects, MobWorlds
 from .exception import ArgumentError, MasterMapError, ModError, StateError
 
@@ -217,14 +216,13 @@ class ModFile(object):
             #--Raw data read
             subProgress.setFull(ins.size)
             insAtEnd = ins.atEnd
-            insSeek = ins.seek
             insTell = ins.tell
             while not insAtEnd():
                 #--Get record info and handle it
                 header = insRecHeader()
                 if not header.is_top_group_header:
                     raise ModError(self.fileInfo.name,u'Improperly grouped file.')
-                label,size = header.label,header.size
+                label = header.label
                 topClass = self.loadFactory.getTopClass(label)
                 try:
                     if topClass:
@@ -273,7 +271,7 @@ class ModFile(object):
         outPath -- Path of the output file to write to. Defaults to original file path."""
         if not self.loadFactory.keepAll: raise StateError(u"Insufficient data to write file.")
         outPath = outPath or self.fileInfo.getPath()
-        with ModWriter(outPath.open(u'wb')) as out:
+        with outPath.open(u'wb') as out:
             #--Mod Record
             self.tes4.setChanged()
             self.tes4.numRecords = sum(block.getNumRecords() for block in self.tops.values())
@@ -281,9 +279,9 @@ class ModFile(object):
             self.tes4.dump(out)
             #--Blocks
             selfTops = self.tops
-            for rec_type in RecordHeader.top_grup_sigs:
-                if rec_type in selfTops:
-                    selfTops[rec_type].dump(out)
+            for rsig in RecordHeader.top_grup_sigs:
+                if rsig in selfTops:
+                    selfTops[rsig].dump(out)
 
     def getLongMapper(self):
         """Returns a mapping function to map short fids to long fids."""
