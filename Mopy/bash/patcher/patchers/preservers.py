@@ -209,7 +209,6 @@ class _APreserver(ImportPatcher):
             if srcMod not in minfs: continue
             srcInfo = minfs[srcMod]
             srcFile = ModFile(srcInfo,loadFactory)
-            masters = srcInfo.get_masters()
             srcFile.load(do_unpack=True)
             srcFile.convertToLongFids(longTypes)
             mapper = srcFile.getLongMapper()
@@ -225,7 +224,7 @@ class _APreserver(ImportPatcher):
                 # filtering by masters, then move on to the next mod
                 id_data.update(temp_id_data)
                 continue
-            for master in masters:
+            for master in srcInfo.masterNames:
                 if master not in minfs: continue # or break filter mods
                 if master in cachedMasters:
                     masterFile = cachedMasters[master]
@@ -570,7 +569,6 @@ class CellImporter(ImportPatcher):
             srcFile.load(True)
             srcFile.convertToLongFids(('CELL','WRLD'))
             cachedMasters[srcMod] = srcFile
-            masters = srcInfo.get_masters()
             bashTags = srcInfo.getBashTags()
             # print bashTags
             tags = bashTags & set(self.recAttrs)
@@ -588,7 +586,7 @@ class CellImporter(ImportPatcher):
                         importCellBlockData(cellBlock)
                     if worldBlock.worldCellBlock:
                         importCellBlockData(worldBlock.worldCellBlock)
-            for master in masters:
+            for master in srcInfo.masterNames:
                 if master not in minfs: continue # or break filter mods
                 if master in cachedMasters:
                     masterFile = cachedMasters[master]
