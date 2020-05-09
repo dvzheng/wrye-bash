@@ -37,7 +37,7 @@ from .common_subrecords import MelEdid
 from .record_structs import MelRecord, MelSet
 from .utils_constants import FID
 from .. import bass, bolt, exception
-from ..bolt import decoder, struct_pack, ChardetStr
+from ..bolt import decoder, struct_pack, ChardetStr, encode
 from ..exception import StateError
 
 #------------------------------------------------------------------------------
@@ -97,6 +97,12 @@ class MreHeaderBase(MelRecord):
         self.changed = True
         self.nextObject += 1
         return self.nextObject -1
+
+    def set_plugin_masters(self, new_masters):
+        # TODO below must be per plugin or use bolt.PluginEncoding or... -> note we dump in cp1252
+        self.masters = [ChardetStr(encode(x)) for x in new_masters]
+
+    def num_masters(self): return len(self.masters)
 
     __slots__ = []
 
