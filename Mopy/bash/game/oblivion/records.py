@@ -108,11 +108,7 @@ class MelObmeScitGroup(MelGroup):
                 @efix_param_info.setter
                 def efix_param_info(self, new_efix_info):
                     record.efix_param_info = new_efix_info
-            target = _MelHackyObject()
-            for element in self.elements:
-                element.setDefault(target)
-            target.__slots__ = [s for element in self.elements for s in
-                                element.getSlotsUsed()]
+            target = self.getDefault(_MelHackyObject)
             record.__setattr__(self.attr,target)
         self.loaders[sub_type].load_data(target, ins, sub_type, size_, readId)
 
