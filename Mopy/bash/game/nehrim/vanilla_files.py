@@ -41,6 +41,7 @@ vanilla_files = {
     u'Music\\Explore\\Atmosphere_13.mp3',
     u'Music\\Explore\\Atmosphere_14.mp3',
     u'Music\\Explore\\Atmosphere_15.mp3',
+    u'Music\\Explore\\Atmosphere_16.mp3',
     u'Music\\Public\\Town_01.mp3',
     u'Music\\Public\\Town_02.mp3',
     u'Music\\Public\\Town_03.mp3',

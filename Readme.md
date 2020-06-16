@@ -169,4 +169,4 @@ bleeding edge branch. Commits land here for testing.
   [28]: https://github.com/wrye-bash/wrye-bash/wiki/%5Bgithub%5D-Branching-and-merging-to-dev-using-rebase
   [29]: https://github.com/wrye-bash/wrye-bash/wiki/%5Bdev%5D-Coding-Style
   [30]: https://www.nexusmods.com/enderal/mods/97
-  [31]: https://www.nexusmods.com/nehrim/mods/???
+  [31]: https://www.nexusmods.com/nehrim/mods/2
