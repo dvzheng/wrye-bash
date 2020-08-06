@@ -521,8 +521,15 @@ class AAssortedTweak_PotionWeight(AMultiTweakItem_Weight):
     tweak_log_msg = _(u'Potions Reweighed: %(total_changed)d')
     _log_weight_value = _(u'Potions set to maximum weight of %f.')
 
+    def validate_values(self, chosen_values):
+        if chosen_values[0] >= 1.0:
+            return _(u'Maximum potion weight cannot exceed 1.0. Potions with '
+                     u'higher weight are ignored by this tweak (since they '
+                     u"are usually special 'potion in name only' items).")
+        return None
+
     def wants_record(self, record):
-        return record.weight < 1.0 and super(
+        return self.chosen_weight < record.weight < 1.0 and super(
             AAssortedTweak_PotionWeight, self).wants_record(record)
 
 class AssortedTweak_PotionWeight(_PSeffWeightTweak,
