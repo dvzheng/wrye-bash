@@ -127,7 +127,9 @@ class _APreserver(ImportPatcher):
     def _parse_csv_sources(self, progress):
         """Parses CSV files. Only called if _csv_parser is set. Override as
         needed and call _process_csv_sources until parser ABC is done."""
-        parser_instance = self._csv_parser(aliases=self.patchFile.aliases)
+        parser_instance = self._csv_parser()
+        parser_instance.aliases = self.patchFile.aliases
+        parser_instance.called_from_patcher = True
         for src_path in self.csv_srcs:
             try:
                 parser_instance.readFromText(getPatchesPath(src_path))
@@ -358,10 +360,20 @@ class DestructiblePatcher(_APreserver):
     rec_attrs = {x: ('destructible',) for x in bush.game.destructible_types}
 
 #------------------------------------------------------------------------------
+class ImportEffectsStats(_APreserver):
+    """Preserves changes to MGEF stats."""
+    rec_attrs = {b'MGEF': bush.game.mgef_stats_attrs}
+
+#------------------------------------------------------------------------------
+class ImportEnchantmentStats(_APreserver):
+    """Preserves changes to ENCH stats."""
+    rec_attrs = {b'ENCH': bush.game.ench_stats_attrs}
+
+#------------------------------------------------------------------------------
 class ImportFactions(_APreserver):
     logMsg = u'\n=== ' + _(u'Refactioned Actors')
     srcsHeader = u'=== ' + _(u'Source Mods/Files')
-    rec_attrs = {x: (u'factions',) for x in (b'CREA', b'NPC_')}
+    rec_attrs = {x: (u'factions',) for x in bush.game.actor_types}
     _csv_parser = parsers.ActorFactions
 
     def _parse_csv_sources(self, progress):
@@ -376,7 +388,7 @@ class ImportFactions(_APreserver):
         self._process_csv_sources(
             {r: {f: {u'factions': [make_obj(r, o) for o in a]}
                  for f, a in d.iteritems()}
-             for r, d in fact_parser.type_id_factions.iteritems()})
+             for r, d in fact_parser.id_stored_info.iteritems()})
 
 #------------------------------------------------------------------------------
 class ImportScripts(_APreserver):
@@ -704,7 +716,6 @@ class CellImporter(ImportPatcher):
 #------------------------------------------------------------------------------
 class GraphicsPatcher(_APreserver):
     rec_attrs = bush.game.graphicsTypes
-    long_types = bush.game.graphicsLongsTypes
     _fid_rec_attrs = bush.game.graphicsFidTypes
 
     def _inner_loop(self, keep, records, top_mod_rec, type_count,
