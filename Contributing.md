@@ -115,7 +115,6 @@ help advance this project. Some outstanding issues we need help with are:
 1. Add tests for other sensitive areas (load order, refresh, BAIN etc)
 1. Move on to newer python/wx python versions, initially wx classic 3.02
 1. Update save files editing code for games other than Oblivion
-1. Update CBash for games other than Oblivion. CBash repo: https://github.com/wrye-bash/CBash
 
 Another good starting point is the
 [currently worked on issues](https://github.com/wrye-bash/wrye-bash/issues?utf8=%E2%9C%93&q=sort%3Aupdated-desc%20is%3Aopen)

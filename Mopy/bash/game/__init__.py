@@ -303,7 +303,6 @@ class GameInfo(object):
     class Esp(object):
         # Wrye Bash capabilities
         canBash = False         # Can create Bashed Patches
-        canCBash = False        # CBash can handle this game's records
         canEditHeader = False   # Can edit basic info in the main header
                                 # record - generally has signature 'TES4'
         # Valid ESM/ESP header versions
@@ -337,12 +336,8 @@ class GameInfo(object):
     allTags = set()
 
     # Patcher available when building a Bashed Patch (referenced by class name)
-    # PatchMerger must come first if enabled, see
-    # patcher.base.APatchMerger.__init__
+    # PatchMerger must come first if enabled, see PatchMerger.__init__
     patchers = ()
-
-    # CBash patchers available when building a Bashed Patch
-    CBash_patchers = () # CBash_PatchMerger must come first if enabled!
 
     # Magic Info
     weaponTypes = ()

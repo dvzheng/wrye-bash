@@ -28,7 +28,6 @@ to eventually absorb all of them under the _AMerger base class."""
 from collections import defaultdict, Counter
 from itertools import chain
 # Internal
-from ._shared import _AImportInventory
 from .base import ImportPatcher
 from ... import bush
 from ...brec import MreRecord
@@ -52,7 +51,6 @@ class _AMerger(ImportPatcher):
     _wanted_subrecord = {}
 
     def __init__(self, p_name, p_file, p_sources):
-        ##: Is this equivalent to allowUnloaded on the CBash side?
         p_sources = [x for x in p_sources if
                      x in p_file.p_file_minfos and x in p_file.allSet]
         super(_AMerger, self).__init__(p_name, p_file, p_sources)
@@ -243,7 +241,8 @@ class _AMerger(ImportPatcher):
 #------------------------------------------------------------------------------
 # Absorbed patchers -----------------------------------------------------------
 #------------------------------------------------------------------------------
-class ImportInventory(_AMerger, _AImportInventory):
+class ImportInventory(_AMerger):
+    iiMode = True
     logMsg = u'\n=== ' + _(u'Inventories Changed') + u': %d'
     _add_tag = u'Invent.Add'
     _change_tag = u'Invent.Change'

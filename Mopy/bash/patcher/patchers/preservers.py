@@ -28,8 +28,6 @@ from collections import defaultdict, Counter
 from itertools import chain
 from operator import attrgetter
 # Internal
-from ._shared import _ANamesPatcher, _ANpcFacePatcher, _ASpellsPatcher, \
-    _AStatsPatcher
 from .base import ImportPatcher
 from .. import getPatchesPath
 from ... import bush, load_order, parsers
@@ -403,7 +401,10 @@ class KFFZPatcher(_APreserver):
     rec_attrs = {x: ('animations',) for x in bush.game.actor_types}
 
 #------------------------------------------------------------------------------
-class NamesPatcher(_ANamesPatcher, _APreserver):
+class NamesPatcher(_APreserver):
+    """Import names from source mods/files."""
+    logMsg =  u'\n=== ' + _(u'Renamed Items')
+    srcsHeader = u'=== ' + _(u'Source Mods/Files')
     rec_attrs = {x: (u'full',) for x in bush.game.namesTypes}
     _csv_parser = parsers.FullNames
 
@@ -415,7 +416,9 @@ class NamesPatcher(_ANamesPatcher, _APreserver):
              for r, d in full_parser.type_id_name.iteritems()})
 
 #------------------------------------------------------------------------------
-class NpcFacePatcher(_ANpcFacePatcher, _APreserver):
+class NpcFacePatcher(_APreserver):
+    """NPC Faces patcher, for use with TNR or similar mods."""
+    _read_write_records = (b'NPC_',)
     logMsg = u'\n=== '+_(u'Faces Patched')
     rec_attrs = {b'NPC_': {
         u'NPC.Eyes': (),
@@ -446,7 +449,11 @@ class SoundPatcher(_APreserver):
     long_types = bush.game.soundsLongsTypes
 
 #------------------------------------------------------------------------------
-class SpellsPatcher(_ASpellsPatcher, _APreserver):
+class SpellsPatcher(_APreserver):
+    """Import spell changes from mod files."""
+    scanOrder = 29
+    editOrder = 29 #--Run ahead of bow patcher
+    _read_write_records = (b'SPEL',)
     logMsg = u'\n=== ' + _(u'Modified SPEL Stats')
     srcsHeader = u'=== ' + _(u'Source Mods/Files')
     rec_attrs = {b'SPEL': bush.game.spell_stats_attrs}
@@ -460,7 +467,12 @@ class SpellsPatcher(_ASpellsPatcher, _APreserver):
                        for f, l in spel_parser.fid_stats.iteritems()}})
 
 #------------------------------------------------------------------------------
-class StatsPatcher(_AStatsPatcher, _APreserver):
+class StatsPatcher(_APreserver):
+    """Import stats from mod file."""
+    scanOrder = 28
+    editOrder = 28 #--Run ahead of bow patcher
+    logMsg = u'\n=== ' + _(u'Imported Stats')
+    srcsHeader = u'=== ' + _(u'Source Mods/Files')
     # Don't patch Editor IDs - those are only in statsTypes for the
     # Export/Import links
     rec_attrs = {r: tuple(x for x in a if x != u'eid')

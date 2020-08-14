@@ -24,15 +24,9 @@
 from collections import namedtuple
 from .. import balt, bolt, bass
 
-PatcherInfo = namedtuple('PatcherInfo', ['clazz', 'twin_patcher', 'cls_vars'])
+PatcherInfo = namedtuple('PatcherInfo', ['clazz', 'cls_vars'])
 
-def configIsCBash(patchConfigs): ##: belongs to basher but used also in bosh
-    for key in patchConfigs:
-        if 'CBash' in key:
-            return True
-    return False
-
-def exportConfig(patch_name, config, isCBash, win, outDir):
+def exportConfig(patch_name, config, win, outDir):
     outFile = patch_name + u'_Configuration.dat'
     outDir.makedirs()
     #--File dialog
@@ -42,8 +36,8 @@ def exportConfig(patch_name, config, isCBash, win, outDir):
         wildcard=u'*_Configuration.dat')
     if outPath:
         table = bolt.DataTable(bolt.PickleDict(outPath))
-        table.setItem(bolt.GPath(u'Saved Bashed Patch Configuration (%s)' % (
-            [u'Python', u'CBash'][isCBash])), 'bash.patch.configs', config)
+        table.setItem(bolt.GPath(u'Saved Bashed Patch Configuration (Python)'),
+            'bash.patch.configs', config)
         table.save()
 
 def getPatchesPath(fileName):

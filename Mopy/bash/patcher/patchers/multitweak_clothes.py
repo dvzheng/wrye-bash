@@ -25,14 +25,11 @@
 """This module contains oblivion multitweak item patcher classes that belong
 to the Clothes Multitweaker - as well as the ClothesTweaker itself."""
 import itertools
-from collections import Counter
-from ... import load_order
-from ...patcher.base import AMultiTweaker, DynamicNamedTweak
-from ...patcher.patchers.base import MultiTweakItem, CBash_MultiTweakItem
-from ...patcher.patchers.base import MultiTweaker, CBash_MultiTweaker
+from ...patcher.base import DynamicNamedTweak
+from ...patcher.patchers.base import MultiTweakItem, MultiTweaker
 
 # Patchers: 30 ----------------------------------------------------------------
-class AClothesTweak(DynamicNamedTweak):
+class ClothesTweak(DynamicNamedTweak, MultiTweakItem):
     tweak_read_classes = 'CLOT',
     clothes_flags = {
         u'hoods':    0x00000002,
@@ -50,7 +47,7 @@ class AClothesTweak(DynamicNamedTweak):
         # u'rings':   (1<<6) + (1<<7),
 
     def __init__(self, tweak_name, tweak_tip, key, *choices):
-        super(AClothesTweak, self).__init__(tweak_name, tweak_tip, key,
+        super(ClothesTweak, self).__init__(tweak_name, tweak_tip, key,
                                             *choices)
         typeKey = key[:key.find(u'.')]
         self.orTypeFlags = typeKey == u'rings'
@@ -58,19 +55,11 @@ class AClothesTweak(DynamicNamedTweak):
 
     def isMyType(self,record):
         """Returns true to save record for late processing."""
+        if record.flags.notPlayable: return False #--Ignore non-playable items.
         recTypeFlags = int(record.flags) & 0xFFFF
         myTypeFlags = self.typeFlags
         return ((recTypeFlags == myTypeFlags) or (
             self.orTypeFlags and (recTypeFlags & myTypeFlags == recTypeFlags)))
-
-class ClothesTweak(AClothesTweak,MultiTweakItem):
-    def isMyType(self,record):
-        """Returns true to save record for late processing."""
-        # TODO : needed in CBash ?
-        if record.flags.notPlayable: return False #--Ignore non-playable items.
-        return super(ClothesTweak,self).isMyType(record)
-
-class CBash_ClothesTweak(AClothesTweak,CBash_MultiTweakItem): pass
 
 #------------------------------------------------------------------------------
 class ClothesTweak_MaxWeight(ClothesTweak):
@@ -88,50 +77,6 @@ class ClothesTweak_MaxWeight(ClothesTweak):
                 keep(record.fid)
                 tweakCount += 1
         log(u'* %s: [%4.2f]: %d' % (self.tweak_name,maxWeight,tweakCount))
-
-class CBash_ClothesTweak_MaxWeight(CBash_ClothesTweak):
-    """Enforce a max weight for specified clothes."""
-
-    def __init__(self, tweak_name, tweak_tip, key, *choices):
-        super(CBash_ClothesTweak_MaxWeight, self).__init__(
-            tweak_name, tweak_tip, key, *choices)
-        self.matchFlags = {'amulets.maxWeight':('IsAmulet',),
-                         'rings.maxWeight':('IsRightRing','IsLeftRing'),
-                         'hoods.maxWeight':('IsHair',)
-                         }[key]
-        self.logMsg = u'* '+_(u'Clothes Reweighed') + u': %d'
-
-    def apply(self,modFile,record,bashTags):
-        """Edits patch file as desired. """
-        if record.IsNonPlayable:
-            return
-        maxWeight = self.choiceValues[self.chosen][0]
-        superWeight = max(10,5*maxWeight) #--Guess is intentionally overweight
-        if (record.weight > maxWeight) and self.isMyType(record) and (
-                    record.weight < superWeight):
-            for attr in self.matchFlags:
-                if getattr(record, attr):
-                    break
-            else:
-                return
-            override = record.CopyAsOverride(self.patchFile)
-            if override:
-                override.weight = maxWeight
-                self.mod_count[modFile.GName] += 1
-                record.UnloadRecord()
-                record._RecordID = override._RecordID
-
-    def buildPatchLog(self,log):
-        """Will write to log."""
-        #--Log
-        mod_count = self.mod_count
-        maxWeight = self.choiceValues[self.chosen][0]
-        log.setHeader(self.logHeader)
-        log(self.logMsg % sum(mod_count.values()))
-        for srcMod in load_order.get_ordered(mod_count.keys()):
-            log(u'  * %s: [%4.2f]: %d' % (
-                srcMod.s, maxWeight, mod_count[srcMod]))
-        self.mod_count = Counter()
 
 #------------------------------------------------------------------------------
 class ClothesTweak_Unblock(ClothesTweak):
@@ -153,44 +98,10 @@ class ClothesTweak_Unblock(ClothesTweak):
                 tweakCount += 1
         log(u'* %s: %d' % (self.tweak_name,tweakCount))
 
-class CBash_ClothesTweak_Unblock(CBash_ClothesTweak):
-    """Unlimited rings, amulets."""
-    scanOrder = 31
-    editOrder = 31
-
-    def __init__(self, tweak_name, tweak_tip, key):
-        super(CBash_ClothesTweak_Unblock, self).__init__(tweak_name, tweak_tip,
-                                                         key)
-        self.hideFlags = {'amulets.unblock.amulets':('IsAmulet',),
-                         'robes.show.amulets2':('IsHideAmulets',),
-                         'rings.unblock.rings':('IsRightRing','IsLeftRing'),
-                         'gloves.unblock.rings2':('IsHideRings',),
-                         'robes.unblock.pants':('IsLowerBody',)
-                         }[key]
-        self.logMsg = u'* '+_(u'Clothing Pieces Tweaked') + u': %d'
-
-    def apply(self,modFile,record,bashTags):
-        """Edits patch file as desired. """
-        if record.IsNonPlayable:
-            return
-        if self.isMyType(record):
-            for flag in self.hideFlags:
-                if getattr(record, flag):
-                    break
-            else:
-                return
-            override = record.CopyAsOverride(self.patchFile)
-            if override:
-                for attr in self.hideFlags:
-                    setattr(override, attr, False)
-                self.mod_count[modFile.GName] += 1
-                record.UnloadRecord()
-                record._RecordID = override._RecordID
-
 #------------------------------------------------------------------------------
-class _AClothesTweaker(AMultiTweaker):
+class ClothesTweaker(MultiTweaker):
     """Patches clothes in miscellaneous ways."""
-
+    _read_write_records = ('CLOT',)
     _unblock = ((_(u"Unlimited Amulets"),
                  _(u"Wear unlimited number of amulets - but they won't display."),
                  u'amulets.unblock.amulets',),
@@ -234,9 +145,6 @@ class _AClothesTweaker(AMultiTweaker):
     scanOrder = 31
     editOrder = 31
 
-class ClothesTweaker(_AClothesTweaker,MultiTweaker):
-    _read_write_records = ('CLOT',)
-
     @classmethod
     def tweak_instances(cls):
         return sorted(itertools.chain(
@@ -264,12 +172,3 @@ class ClothesTweaker(_AClothesTweaker,MultiTweaker):
         log.setHeader(u'= ' + self._patcher_name)
         for tweak in self.enabled_tweaks:
             tweak.buildPatch(self.patchFile,keep,log)
-
-class CBash_ClothesTweaker(_AClothesTweaker,CBash_MultiTweaker):
-
-    @classmethod
-    def tweak_instances(cls):
-        return sorted(itertools.chain(
-            (CBash_ClothesTweak_Unblock(*x) for x in cls._unblock),
-            (CBash_ClothesTweak_MaxWeight(*x) for x in cls._max_weight)),
-                      key=lambda a: a.tweak_name.lower())

@@ -247,8 +247,6 @@ def sortFiles(files, __split=os.path.split):
     sort_keys_dict = dict((x, __split(x.lower())) for x in files)
     return sorted(files, key=sort_keys_dict.__getitem__)
 
-CBash = 0
-
 # PY3: Dicts are ordered by default on py3.7, so drop this in favor of just
 # collections.defaultdict
 class OrderedDefaultDict(collections.OrderedDict, collections.defaultdict):
