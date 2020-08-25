@@ -4646,8 +4646,8 @@ class MreScrl(MelRecord,MreHasEffects):
         MelFid('YNAM','pickupSound',),
         MelFid('ZNAM','dropSound',),
         MelStruct('DATA','If','itemValue','itemWeight',),
-        MelStruct('SPIT','IIIfIIffI','baseCost',(ScrollDataFlags,'dataFlags',0),
-                  'scrollType','chargeTime','castType','targetType',
+        MelStruct('SPIT','IIIfIIffI','cost',(ScrollDataFlags,'dataFlags',0),
+                  'spellType','chargeTime','castType','targetType',
                   'castDuration','range',(FID,'halfCostPerk'),),
         MelEffects(),
     )
